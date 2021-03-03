@@ -1,12 +1,19 @@
-# 🚀 Proyecto MONGODB 🚀
-# Hecho por Lucía Ramírez Monje, 1ºASIR Grupo 2
+# PROYECTO MONGODB
+## _Hecho por Lucía Ramírez Monje_
 
-* Nos encontramos en la biblioteca municipal, las personas que son socias de la biblioteca 
-* disponen de un código de socio y además tenemos almacenados sus datos personales, DNI, dirección, teléfono, etc.
-* La biblioteca almacena libros que presta a los socios/as, de ellos están almacenados sus títulos,
-* editorial/es, fecha de publicación, nombre del autor/es, etc.
-* Para saber si algun libro está deteriorado usamos un campo booleano.
+Este proyecto está enfocado en el mundo real, se compone de la base de datos de una biblioteca.
+Dentro de la carpeta DOC encontraremos un pdf que explica aspectos teóricos y técnicos.
+Dentro de la carpeta SRC encontramos las siguientes colecciones:
 
+- Colección Libros
+- Colección Autores 
+- Colección Ejemplares
+- Colección Usuarios
+- Colección Préstamos
+
+Para más detalle sobre los tipos de datos que contienen dichas colecciones, ir al PDF dentro de la carpeta DOC.
+
+A continuación de las colecciones aparece el archivo. .............
 
 
 ## Construido con... 🛠️
