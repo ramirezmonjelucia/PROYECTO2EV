@@ -1,8 +1,6 @@
 db.ejemplares.drop()
 db.ejemplares.insertMany([
 
-
-
     {
         "IdEjemplar": 89641334,
         "Deteriorado": true,
@@ -253,9 +251,5 @@ db.ejemplares.insertMany([
         "Deteriorado": false,
         "ISBN": "FO46 4646 9183 1739 40",
 
-    },
-
-
-
-
+    }
 ])

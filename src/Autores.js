@@ -1,3 +1,4 @@
+db.autores.
 db.autores.insertMany([
     {
         "DNI": "25931457S",
@@ -20,7 +21,7 @@ db.autores.insertMany([
     },
     {
         "DNI": "64682316Z",
-        "Nombre": "Juan José Millás",
+        "Nombre": "Juan José Millas",
         "FechaNac": new Date("1946-01-31"),
         "Nacionalidad": "Española"
     },

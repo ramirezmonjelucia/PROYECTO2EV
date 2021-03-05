@@ -1,5 +1,4 @@
-db.books.drop()
-db.books.insertMany([
+db.libros.insertMany([
     {
         "Título": "Secuestrado",
         "Editorial": "Alba Editorial",
