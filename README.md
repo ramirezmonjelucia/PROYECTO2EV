@@ -13,8 +13,6 @@ Dentro de la carpeta SRC encontramos las siguientes colecciones:
 
 Para más detalle sobre los tipos de datos que contienen dichas colecciones, ir al PDF dentro de la carpeta DOC.
 
-A continuación de las colecciones aparece el archivo. .............
-
 
 ## Construido con... 🛠️
 

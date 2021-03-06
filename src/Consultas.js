@@ -1,24 +1,24 @@
 //Se piden los ejemplares que están deteriorados para poder reemplazarlos.
 db.ejemplares.aggregate([
-    {
-        $lookup: {
-            from: 'libros',
-            localField: 'ISBN',
-            foreignField: 'ISBN',
-            as: 'Detalles'
-        }
-    },
-    {
-        $match: {
-            Deteriorado: false
-        }
-    },
-    {
-        $project: {
-            _id: 0,
+        {
+                $lookup: {
+                        from: 'libros',
+                        localField: 'ISBN',
+                        foreignField: 'ISBN',
+                        as: 'Detalles'
+                }
+        },
+        {
+                $match: {
+                        Deteriorado: false
+                }
+        },
+        {
+                $project: {
+                        _id: 0,
 
+                }
         }
-    }
 ]).pretty()
 
 /*
@@ -47,17 +47,17 @@ db.ejemplares.aggregate([
 //Se pide una colección en la misma base de datos en la que aparezca el autor y los libros que ha escrito.
 
 db.getSiblingDB("PROYECTO2EV").libros.aggregate([
-    {
-        $group: {
-            _id: "$Autor",
-            Libros: {
-                $push: "$Título"
-            }
+        {
+                $group: {
+                        _id: "$Autor",
+                        Libros: {
+                                $push: "$Título"
+                        }
+                }
+        },
+        {
+                $out: "librosyautores"
         }
-    },
-    {
-        $out: "librosyautores"
-    }
 ])
 
 /*
@@ -84,24 +84,24 @@ db.getSiblingDB("PROYECTO2EV").libros.aggregate([
 //CASO PRÁCTICO: es la semana cultural y en la biblioteca se van a preparar una serie de 
 //charlas y se necesita una línea temporal para que sea más visual.
 db.autores.aggregate([
-    {
-        $bucket: {
-            groupBy: { $year: "$FechaNac" },
-            boundaries: [1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000],
-            default: "Actualidad",
-            output: {
-                "count": { $sum: 1 },
-                "Autores":
-                {
-                    $push: {
-                        "Nombre": "$Nombre",
-                        "AñoNacimiento": { $year: "$FechaNac" }
-                    }
+        {
+                $bucket: {
+                        groupBy: { $year: "$FechaNac" },
+                        boundaries: [1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000],
+                        default: "Actualidad",
+                        output: {
+                                "count": { $sum: 1 },
+                                "Autores":
+                                {
+                                        $push: {
+                                                "Nombre": "$Nombre",
+                                                "AñoNacimiento": { $year: "$FechaNac" }
+                                        }
+                                }
+                        }
                 }
-            }
-        }
-    },
-    { $merge: "LineaTemporalAutores" }
+        },
+        { $merge: "LineaTemporalAutores" }
 ])
 
 /*
@@ -205,32 +205,32 @@ db.LineaTemporalAutores.find({}).pretty()
 
 //Se piden los libros que han alquilado los usuarios.
 db.usuarios.aggregate([{
-    $lookup: {
+        $lookup: {
 
-        "from": "prestamos",
-        "localField": "CodUsuario",
-        "foreignField": "CodUsuario",
-        "as": "Libros_alquilados"
-    }
-}, {
-    $unwind: {
-        path: "$Libros_alquilados"
-
-    }
-}, {
-    $group: {
-        _id: {
-            _id: "$CodUsuario",
-            NombreUsuario: "$Nombre"
-        },
-        Prestamos: {
-            $push: "$Libros_alquilados"
+                "from": "prestamos",
+                "localField": "CodUsuario",
+                "foreignField": "CodUsuario",
+                "as": "Libros_alquilados"
         }
-    }
 }, {
-    $sort: {
-        _id: 1
-    }
+        $unwind: {
+                path: "$Libros_alquilados"
+
+        }
+}, {
+        $group: {
+                _id: {
+                        _id: "$CodUsuario",
+                        NombreUsuario: "$Nombre"
+                },
+                Prestamos: {
+                        $push: "$Libros_alquilados"
+                }
+        }
+}, {
+        $sort: {
+                _id: 1
+        }
 
 }]).pretty()
 
@@ -321,28 +321,47 @@ db.usuarios.aggregate([{
 */
 
 
-//Se pide un gráfico para saber que autor ha escrito más libros
+//Se pide un gráfico que indique cuantos libros han escrito los autores
 db.autores.aggregate([
-    {
-        "$lookup": {
-            "from": "libros",
-            "localField": "Nombre",
-            "foreignField": "Autor",
-            "as": "Libros escritos"
-        }
-    },
-    {
-        $unset: [
-            "Nacionalidad",
-            "DNI",
-            "FechaFall",
-            "FechaNac",
-            "_id"
-        ]
-    },
-    {$project:{
-        "Nombre": 1,
-        "Libros escritos": {$size: "$Libros escritos"}
-    }},
-    { $merge: "Grafico" }
+        {
+                "$lookup": {
+                        "from": "libros",
+                        "localField": "Nombre",
+                        "foreignField": "Autor",
+                        "as": "Libros escritos"
+                }
+        },
+        {
+                $unset: [
+                        "Nacionalidad",
+                        "DNI",
+                        "FechaFall",
+                        "FechaNac",
+                ]
+        },
+        {
+                $project: {
+                        "Nombre": 1,
+                        "Libros escritos": { $size: "$Libros escritos" }
+                }
+        },
+        { $merge: "Grafico" }
 ]).pretty()
+
+/*
+db.Grafico.find({}).pretty()
+{ "_id" : ObjectId("60422ece2ae72858e1f378bc"), "Libros escritos" : 1, "Nombre" : "Robert Louis Stevenson" }
+{ "_id" : ObjectId("60422ece2ae72858e1f378bd"), "Libros escritos" : 2, "Nombre" : "Arturo Pérez Reverte" }
+{ "_id" : ObjectId("60422ece2ae72858e1f378be"), "Libros escritos" : 1, "Nombre" : "Ken Follett" }
+{ "_id" : ObjectId("60422ece2ae72858e1f378bf"), "Libros escritos" : 1, "Nombre" : "Juan José Millas" }
+{ "_id" : ObjectId("60422ece2ae72858e1f378c0"), "Libros escritos" : 1, "Nombre" : "Blanca García" }
+{ "_id" : ObjectId("60422ece2ae72858e1f378c1"), "Libros escritos" : 1, "Nombre" : "Megan Maxwell" }
+{ "_id" : ObjectId("60422ece2ae72858e1f378c2"), "Libros escritos" : 4, "Nombre" : "Rosa Montero" }
+{ "_id" : ObjectId("60422ece2ae72858e1f378c3"), "Libros escritos" : 4, "Nombre" : "Javier Castillo" }
+{ "_id" : ObjectId("60422ece2ae72858e1f378c4"), "Libros escritos" : 1, "Nombre" : "Anne Frank" }
+{ "_id" : ObjectId("60422ece2ae72858e1f378c5"), "Libros escritos" : 1, "Nombre" : "Eva García Sáenz de Urturi" }
+{ "_id" : ObjectId("60422ece2ae72858e1f378c6"), "Libros escritos" : 1, "Nombre" : "Benjamín Labatut" }
+{ "_id" : ObjectId("60422ece2ae72858e1f378c7"), "Libros escritos" : 1, "Nombre" : "Elena Ferrante" }
+{ "_id" : ObjectId("60422ece2ae72858e1f378c8"), "Libros escritos" : 1, "Nombre" : "María Reig" }
+{ "_id" : ObjectId("60422ece2ae72858e1f378c9"), "Libros escritos" : 1, "Nombre" : "Alice Kellen" }
+*/
