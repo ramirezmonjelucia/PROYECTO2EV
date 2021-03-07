@@ -7,6 +7,7 @@ db.usuarios.insertMany([
             "email": "dbenson0@hotmail.com",
             "Telefono": "6427454873"
         }
+        
     },
     {
         "CodUsuario": 2,
