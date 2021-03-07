@@ -1,3 +1,4 @@
+db.libros.drop()
 db.libros.insertMany([
     {
         "Título": "Secuestrado",

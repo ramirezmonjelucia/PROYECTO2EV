@@ -1,4 +1,4 @@
-db.autores.
+db.autores.drop()
 db.autores.insertMany([
     {
         "DNI": "25931457S",

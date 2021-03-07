@@ -1,3 +1,4 @@
+db.usuarios.drop()
 db.usuarios.insertMany([
     {
         "CodUsuario": 1,
