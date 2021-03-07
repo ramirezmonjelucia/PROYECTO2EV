@@ -365,3 +365,197 @@ db.Grafico.find({}).pretty()
 { "_id" : ObjectId("60422ece2ae72858e1f378c8"), "Libros escritos" : 1, "Nombre" : "María Reig" }
 { "_id" : ObjectId("60422ece2ae72858e1f378c9"), "Libros escritos" : 1, "Nombre" : "Alice Kellen" }
 */
+
+//Se pide una agrupación de los libros por géneros, número de páginas y por la fecha cuando de escritura.
+db.libros.aggregate([
+        {
+                $facet: {                                             //Agrupamos por géneros individuales y se cuentan cuantos libros tienen ese genero
+                        "AgrupaciónPorGéneros": [
+                                { $unwind: "$Géneros" },
+                                { $sortByCount: "$Géneros" }
+                        ],
+                        "AgrupaciónPorNumerodepaginas": [                   //Agrupamos por numero de páginas desde 200 hasta 500 y se recuentan. 
+                                //Los libros sobrantes aparecen en el apartado +500
+                                {
+                                        $bucket: {
+                                                groupBy: "$NºPáginas",
+                                                boundaries: [200, 300, 400, 500],
+                                                default: "+500",
+                                                output: {
+                                                        "Cantidad": { $sum: 1 }
+                                                }
+                                        }
+                                }
+                        ],
+                        "AgrupaciónPorAño": [                               //Se agrupan los libros por año, desde el primero al último y se recuentan.
+                                {
+                                        $bucketAuto: {
+                                                groupBy: { $year: "$Fecha" },
+                                                buckets: 1
+                                        }
+                                }
+                        ]
+                }
+        }
+]).pretty()
+
+/*
+{
+       "AgrupaciónPorGéneros" : [
+               {
+                       "_id" : "Ficción",
+                       "count" : 17
+               },
+               {
+                       "_id" : "Evolución",
+                       "count" : 6
+               },
+               {
+                       "_id" : "Suspense",
+                       "count" : 5
+               },
+               {
+                       "_id" : "Drama",
+                       "count" : 5
+               },
+               {
+                       "_id" : "Misterio",
+                       "count" : 5
+               },
+               {
+                       "_id" : "Aventura",
+                       "count" : 2
+               },
+               {
+                       "_id" : "Autobiografía",
+                       "count" : 2
+               },
+               {
+                       "_id" : "Memorias",
+                       "count" : 1
+               },
+               {
+                       "_id" : "Guerra",
+                       "count" : 1
+               },
+               {
+                       "_id" : "Cocina",
+                       "count" : 1
+               },
+               {
+                       "_id" : "Terapia",
+                       "count" : 1
+               },
+               {
+                       "_id" : "Antropología",
+                       "count" : 1
+               },
+               {
+                       "_id" : "Narrativa romántica",
+                       "count" : 1
+               }
+       ],
+       "AgrupaciónPorNumerodepaginas" : [
+               {
+                       "_id" : 200,
+                       "Cantidad" : 6
+               },
+               {
+                       "_id" : 300,
+                       "Cantidad" : 4
+               },
+               {
+                       "_id" : 400,
+                       "Cantidad" : 6
+               },
+               {
+                       "_id" : "+500",
+                       "Cantidad" : 5
+               }
+       ],
+       "AgrupaciónPorAño" : [
+               {
+                       "_id" : {
+                               "min" : 2014,
+                               "max" : 2020
+                       },
+                       "count" : 21
+               }
+       ]
+}
+*/
+
+//Se pide un pequeño resumen de los libros que haya escrito Rosa Montero
+
+db.autores.aggregate([
+        {
+                $match: {
+                        "Nombre": "Rosa Montero"
+                }
+        },
+        {
+                $graphLookup: {
+                        from: "libros",
+                        startWith: "$Nombre",
+                        connectFromField: "Autor",
+                        connectToField: "Autor",
+                        as: "Libros"
+                }
+        },
+        {
+                $unwind: {
+                        path: "$Libros"
+                }
+        },
+        {
+                $project: {
+                        _id: 0,
+                        Título: "$Libros.Título",
+                        Editorial: "$Libros.Editorial",
+                        ISBN: "$Libros.ISBN",
+                        "1ºGénero": {
+                                $arrayElemAt: [
+                                        "$Libros.Géneros",
+                                        0
+                                ]
+                        },
+                        "2ºGénero": {
+                                $arrayElemAt: [
+                                        "$Libros.Géneros",
+                                        1
+                                ]
+                        }
+                }
+        }
+]).pretty()
+
+/*
+{
+        "Título" : "La buena suerte",
+        "Editorial" : "Alfaguara",
+        "ISBN" : "RO59 QTIN AF7Y PUAC 57L8 C2MX",
+        "1ºGénero" : "Ficción",
+        "2ºGénero" : "Evolución"
+}
+{
+        "Título" : "La carne",
+        "Editorial" : "Debolsillo",
+        "ISBN" : "CZ64 0022 2438 5103 2864 3882",
+        "1ºGénero" : "Ficción",
+        "2ºGénero" : "Evolución"
+}
+{
+        "Título" : "La ridícula idea de no volver a verte",
+        "Editorial" : "Booket",
+        "ISBN" : "KZ46 9541 0BD0 KKEO DKNI",
+        "1ºGénero" : "Ficción",
+        "2ºGénero" : "Evolución"
+}
+{
+        "Título" : "Los tiempos del odio",
+        "Editorial" : "Booket",
+        "ISBN" : "NL52 SJUP 4616 3518 38",
+        "1ºGénero" : "Ficción",
+        "2ºGénero" : "Evolución"
+}
+*/
